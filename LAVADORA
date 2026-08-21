@@ -1,0 +1,15 @@
+;Laboratorio 1, TECNOLOGÍAS DE MICROPROCESAMIENTO
+
+;===============================
+;Problema A. Lavadora Automática
+;===============================
+
+;Tomamos el ajuste por carga ligera como el predeterminado
+
+.include "m328pdef.inc"
+.org 0x00
+
+;Definamos los pines 
+
+ldi r16, (1<<PB5) ; configuramos el pin 13 digital como salida para el led que indicar el giro
+out DDRB, r16
