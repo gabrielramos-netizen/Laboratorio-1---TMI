@@ -40,5 +40,49 @@ bucle_principal:
     breq num_8
     cpi r17, 9
     breq num_9
-    rjmp leer_botones ;esta etiqueta la usaremos para definiri que botones se presionaron  
+    rjmp leer_botones ;esta etiqueta la usaremos para definir que botones se presionaron  
 
+	num_0:
+    ldi r16, 0b00111111
+    rjmp mostrar_numero
+
+num_1:
+    ldi r16, 0b00000110
+    rjmp mostrar_numero
+
+num_2:
+    ldi r16, 0b01011011
+    rjmp mostrar_numero
+
+num_3:
+    ldi r16, 0b01001111
+    rjmp mostrar_numero
+
+num_4:
+    ldi r16, 0b01100110
+    rjmp mostrar_numero
+
+num_5:
+    ldi r16, 0b01101101
+    rjmp mostrar_numero
+
+num_6:
+    ldi r16, 0b01111101
+    rjmp mostrar_numero
+
+num_7:
+    ldi r16, 0b00000111
+    rjmp mostrar_numero
+
+num_8:
+    ldi r16, 0b01111111
+    rjmp mostrar_numero
+
+num_9:
+    ldi r16, 0b01101111
+    rjmp mostrar_numero
+
+mostrar_numero:
+    out PORTB, r16
+
+	
