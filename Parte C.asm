@@ -480,6 +480,10 @@ L1:
 	ret
 
 Siguiente:
+esperar_soltar_sig:
+	sbic PINC, PC0         
+	rjmp esperar_soltar_sig
+
 	inc r17
 	cpi r17, 9
 	brne no_vuelve1
@@ -487,14 +491,22 @@ Siguiente:
 no_vuelve1:
 	rjmp Selector
 
-Anterior: 
+Anterior:
+esperar_soltar_ant:
+	sbic PINC, PC1          
+	rjmp esperar_soltar_ant
+
 	dec r17
 	cpi r17, 0
 	brne no_vuelve8
 	ldi r17, 8
 no_vuelve8:
-	rjmp Selector 
+	rjmp Selector
 
 Reset:
+esperar_soltar_res:
+	sbic PINC, PC2         
+	rjmp esperar_soltar_res
+
 	ldi r17, 1
 	rjmp Selector
