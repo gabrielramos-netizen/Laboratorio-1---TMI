@@ -39,29 +39,44 @@ INICIO:
 
 Selector:
 	cpi r17, 1
-	breq Secuencia_1
+	brne no_es1
+	rjmp Secuencia_1
+no_es1:
 
 	cpi r17, 2
-	breq Secuencia_2
+	brne no_es2
+	rjmp Secuencia_2
+no_es2:
 
 	cpi r17, 3
-	breq Secuencia_3
+	brne no_es3
+	rjmp Secuencia_3
+no_es3:
 
 	cpi r17, 4
-	breq Secuencia_4
+	brne no_es4
+	rjmp Secuencia_4
+no_es4:
 
 	cpi r17, 5
-	breq Secuencia_5
+	brne no_es5
+	rjmp Secuencia_5
+no_es5:
 
 	cpi r17, 6
-	breq Secuencia_6
+	brne no_es6
+	rjmp Secuencia_6
+no_es6:
 
 	cpi r17, 7
-	breq Secuencia_7
+	brne no_es7
+	rjmp Secuencia_7
+no_es7:
 
 	cpi r17, 8
-	breq Secuencia_8
-
+	brne no_es8
+	rjmp Secuencia_8
+no_es8:
 
 	ldi r17, 1
 	rjmp Selector
@@ -463,15 +478,17 @@ L1:
 Siguiente:
 	inc r17
 	cpi r17, 9
-	brne Selector
-    ldi r17, 1
+	brne no_vuelve1
+	ldi r17, 1
+no_vuelve1:
 	rjmp Selector
 
 Anterior: 
 	dec r17
 	cpi r17, 0
-	brne Selector
+	brne no_vuelve8
 	ldi r17, 8
+no_vuelve8:
 	rjmp Selector 
 
 Reset:
