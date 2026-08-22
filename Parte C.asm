@@ -1,19 +1,20 @@
 .include "m328pbdef.inc"
 
-.equ PB0 = 0
-.equ PB1 = 1
-.equ PB2 = 2
-.equ PB3 = 3
-.equ PB4 = 4
-.equ PB5 = 5
-.equ PB6 = 6
-.equ PB7 = 7
-
 .equ PD0 = 0
 .equ PD1 = 1
 .equ PD2 = 2
+.equ PD3 = 3
+.equ PD4 = 4
+.equ PD5 = 5
+.equ PD6 = 6
+.equ PD7 = 7
+
+.equ PC0 = 0
+.equ PC1 = 1
+.equ PC2 = 2
 
 .org 0x00
+rjmp INICIO
 
 INICIO:
 ;======= Punteto de pila =======;
@@ -24,20 +25,24 @@ INICIO:
 
 ;======= configuracion de leds (salidas)======
 	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out DDRB, r16
+	out DDRD, r16
+	clr r16
+	out PORTD, r16
  
 ;======= Configuracion de Botones (entradas)======
-	ldi r16, (0<<PD0 | 0<<PD1 | 0<<PD2)
-	out DDRD, r16
+	clr r16
+	out DDRC, r16
+	out PORTC, r16          
 
-;===== PULL-UPS =====
-	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2)
-	out PORTD, r16
-
-	ldi r17, 1
-
+	ldi r17, 1   
 
 Selector:
+;======= Limpieza de Pila =======;
+	ldi r16, low(RAMEND)
+	out SPL, r16
+	ldi r16, high(RAMEND)
+	out SPH, r16
+
 	cpi r17, 1
 	brne no_es1
 	rjmp Secuencia_1
@@ -83,365 +88,365 @@ no_es8:
 
 
 Secuencia_1:
-	ldi  r16, (1<<PB0 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB1 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB2 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB2 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB1 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi  r16, (1<<PB0 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_1
 
 Secuencia_2:
-	ldi r16, (1<<PB0 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB3 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_2
 
 Secuencia_3:
-	ldi r16, (1<<PB0 | 1<<PB2 | 1<<PB4 |  1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD2 | 1<<PD4 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, ( 1<<PB1 | 1<<PB3| 1<<PB5 | 1<<PB7)
-	out PORTB, r16
-	rcall Pausa 
+	ldi r16, (1<<PD1 | 1<<PD3 | 1<<PD5 | 1<<PD7)
+	out PORTD, r16
+	rcall Pausa
 
 	rjmp Secuencia_3
 
 Secuencia_4:
-	ldi r16, (1<<PB0)
-	out PORTB, r16
+	ldi r16, (1<<PD0)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1)
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, 0
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3)
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, 0
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, 0
-	out PORTB, r16
-	rcall Pausa
-
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, 0
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, 0
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
+	rcall Pausa
+
+	ldi r16, 0
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_4
 
 Secuencia_5:
-	ldi r16, (1<<PB0)
-	out PORTB, r16
+	ldi r16, (1<<PD0)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB3)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD3)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB3 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB4 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD4 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB4 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD4 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB3 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB3)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD3)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1)
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_5
 
 Secuencia_6:
-	ldi r16, (1<<PB0)
-	out PORTB, r16
+	ldi r16, (1<<PD0)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB3 | 1<<PB4 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD3 | 1<<PD4 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB3 | 1<<PB4 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD4 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_6
 
 Secuencia_7:
-	ldi r16, (1<<PB0 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB3 | 1<<PB4)
-	out PORTB, r16
+	ldi r16, (1<<PD3 | 1<<PD4)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5)
-	out PORTB, r16
+	ldi r16, (1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6)
-	out PORTB, r16
+	ldi r16, (1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
 	rjmp Secuencia_7
 
 Secuencia_8:
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
-	out PORTB, r16
+	ldi r16, (1<<PD0 | 1<<PD1 | 1<<PD2 | 1<<PD3 | 1<<PD4 | 1<<PD5 | 1<<PD6 | 1<<PD7)
+	out PORTD, r16
 	rcall Pausa
 
 	ldi r16, 0
-	out PORTB, r16
+	out PORTD, r16
 	rcall Pausa
 	rcall Pausa
 	rcall Pausa
@@ -449,30 +454,29 @@ Secuencia_8:
 	rjmp Secuencia_8
 
 Pausa:
-	ldi r18, 20   
+	ldi r18, 50
 
 bucle_principal:
-	ldi r19, 54 
-	ldi r20, 250
-
+	ldi r19, 100
+bucle_interno:
+	ldi r20, 200
 L1:
 	dec r20
 	brne L1
 	dec r19
-	brne L1	
+	brne bucle_interno
 
-	sbis PIND, PD0
+	sbic PINC, PC0
 	rjmp Siguiente
 
-	sbis PIND, PD1
-	rjmp Anterior 
+	sbic PINC, PC1
+	rjmp Anterior
 
-	sbis PIND, PD2
+	sbic PINC, PC2
 	rjmp Reset
 
 	dec r18
 	brne bucle_principal
-
 	ret
 
 Siguiente:
