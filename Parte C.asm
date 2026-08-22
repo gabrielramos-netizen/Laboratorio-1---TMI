@@ -1,4 +1,18 @@
 .include "m328pbdef.inc"
+
+.equ PB0 = 0
+.equ PB1 = 1
+.equ PB2 = 2
+.equ PB3 = 3
+.equ PB4 = 4
+.equ PB5 = 5
+.equ PB6 = 6
+.equ PB7 = 7
+
+.equ PD0 = 0
+.equ PD1 = 1
+.equ PD2 = 2
+
 .org 0x00
 
 INICIO:
