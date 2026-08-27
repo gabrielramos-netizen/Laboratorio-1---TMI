@@ -1,6 +1,6 @@
 .include "m328pbdef.inc
 
-; --- Definición de nombres para los registros ---
+; --- DefiniciÃ³n de nombres para los registros ---
 .def regA = r16
 .def regB = r17
 .def selec = r18
@@ -48,5 +48,39 @@ bucle_principal:
 	;====OPERACIONES====;
 op_clear:
 	clr resF
+	rjmp mostrar_resultado
 
+op_resta:
+    mov resF, regA
+    sub resF, regB
+    rjmp mostrar_resultado
 
+op_suma:
+	mov resF, regA
+	add resF, regB
+	rjmp mostrar_resultado
+
+op_xor:
+    mov resF, regA
+    eor resF, regB
+    rjmp mostrar_resultado
+
+op_and:
+    mov resF, regA
+    and resF, regB
+    rjmp mostrar_resultado
+
+op_or:
+    mov resF, regA
+    or resF, regB
+    rjmp mostrar_resultado
+
+op_shl:
+    mov resF, regA
+    lsl resF
+    rjmp mostrar_resultado
+
+op_inc:
+    mov resF, regA
+    inc resF
+    rjmp mostrar_resultado
