@@ -1,6 +1,6 @@
 .include "m328pbdef.inc"
 
-; --- Definición de nombres para los registros ---
+; --- DefiniciÃ³n de nombres para los registros ---
 .def regA = r16
 .def regB = r17
 .def selec = r18
@@ -29,8 +29,13 @@ out PORTC, temp
 
 bucle_principal:
 	in regA, PIND
+	andi regA, 0x0F
+
 	in regB, PINB
+	andi regB, 0x0F     
+
 	in selec, PINC
+	andi selec, 0x07
 
 	cpi selec, 0
 	breq op_clear
