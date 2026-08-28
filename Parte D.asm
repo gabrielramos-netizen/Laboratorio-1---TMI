@@ -1,20 +1,31 @@
-.include "m328pbdef.inc
+.include "m328pbdef.inc"
 
-; --- DefiniciÃ³n de nombres para los registros ---
+; --- Definición de nombres para los registros ---
 .def regA = r16
 .def regB = r17
 .def selec = r18
 .def temp = r19
 .def resF = r20
+.def reg_flags = r21
 
 .cseg
 .org 0x00
 
-;====ENTRADAS====;
-clr temp
-out DDRD, temp
-out DDRB, temp
-out DDRC, temp
+;====Entradas y Salidas====;
+ldi temp, 0xF0
+out DDRD, temp         
+ldi temp, 0x0F
+out PORTD, temp        
+
+ldi temp, 0x70
+out DDRB, temp         
+ldi temp, 0x0F
+out PORTB, temp         
+
+ldi temp, 0x38
+out DDRC, temp          
+ldi temp, 0x07
+out PORTC, temp        
 
 bucle_principal:
 	in regA, PIND
@@ -84,3 +95,12 @@ op_inc:
     mov resF, regA
     inc resF
     rjmp mostrar_resultado
+
+mostrar_resultado:
+	;===Banderas de estados===;
+	in reg_flags, SREG
+
+	;===Resultado F===;
+	out PORTC, resF
+
+	rjmp bucle_principal
