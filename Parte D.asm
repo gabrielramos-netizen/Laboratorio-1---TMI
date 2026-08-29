@@ -105,7 +105,12 @@ mostrar_resultado:
 	;===Banderas de estados===;
 	in reg_flags, SREG
 
-	;===Resultado F===;
-	out PORTC, resF
+	mov temp, resF
+	lsl temp
+	lsl temp
+	lsl temp
+	lsl temp           
+	ori temp, 0x0F      
+	out PORTD, temp
 
 	rjmp bucle_principal
