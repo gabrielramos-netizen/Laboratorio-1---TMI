@@ -1,6 +1,6 @@
 .include "m328pbdef.inc"
 
-; --- DefiniciÃ³n de nombres para los registros ---
+; --- Definición de nombres para los registros ---
 .def regA = r16
 .def regB = r17
 .def selec = r18
@@ -102,15 +102,32 @@ op_inc:
     rjmp mostrar_resultado
 
 mostrar_resultado:
-	;===Banderas de estados===;
-	in reg_flags, SREG
+	in reg_flags, SREG   ; Guarda las banderas
 
+	;====Resultado F====
 	mov temp, resF
 	lsl temp
 	lsl temp
 	lsl temp
-	lsl temp           
-	ori temp, 0x0F      
-	out PORTD, temp
+	lsl temp
+	ori temp, 0x0F
+	out PORTD, temp 
+
+	;====Banderas====
+	mov temp, reg_flags
+	lsl temp
+	lsl temp
+	lsl temp
+	lsl temp
+	ori temp, 0x0F
+	out PORTB, temp
+
+	;====Selector S====
+	mov temp, selec
+	lsl temp
+	lsl temp
+	lsl temp
+	ori temp, 0x07
+	out PORTC, temp
 
 	rjmp bucle_principal
