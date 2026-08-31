@@ -1,6 +1,6 @@
-.include "m328pbdef.inc"
+.include "m328pdef.inc"
 
-; --- Definición de nombres para los registros ---
+; --- DefiniciÃ³n de nombres para los registros ---
 .def regA = r16
 .def regB = r17
 .def selec = r18
@@ -74,6 +74,11 @@ op_resta:
 op_suma:
 	mov resF, regA
 	add resF, regB
+
+	sbrc resF, 4           
+	sec
+
+	andi resF, 0x0F         
 	rjmp mostrar_resultado
 
 op_xor:
