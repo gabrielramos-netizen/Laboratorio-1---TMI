@@ -20,10 +20,10 @@ out PORTD, temp
 ldi temp, 0x70
 out DDRB, temp         
 ldi temp, 0x0F
-out PORTB, temp         
+out PORTB, temp        
 
 ldi temp, 0x38
-out DDRC, temp          
+out DDRC, temp         
 ldi temp, 0x07
 out PORTC, temp        
 
@@ -99,11 +99,15 @@ op_or:
 op_shl:
     mov resF, regA
     lsl resF
+    sbrc resF, 4
+    sec
+    andi resF, 0x0F
     rjmp mostrar_resultado
 
 op_inc:
     mov resF, regA
     inc resF
+    andi resF, 0x0F
     rjmp mostrar_resultado
 
 mostrar_resultado:
