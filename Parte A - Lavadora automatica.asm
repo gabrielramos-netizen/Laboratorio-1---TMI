@@ -4,7 +4,7 @@
 .org 0x0000
     rjmp INICIO
 
-; CONFIGURACIÓN DE PUERTOS
+; CONFIGURACIÃ“N DE PUERTOS
 INICIO:
     ; Configuramos el Stack Pointer inicializandolo  
     ldi r16, LOW(RAMEND)
@@ -55,24 +55,24 @@ REPOSO:
 MOSTRAR_LIGERA:
     ldi r16, 0b00000001   ; PC0 / Pin A0
     out PORTC, r16
-    rjmp REVISAR_BOTONES  ; <-- OBLIGATORIO SALTAR AQUI
+    rjmp REVISAR_BOTONES  ;
 
 MOSTRAR_MEDIA:
     ldi r16, 0b00000010   ; PC1 / Pin A1
     out PORTC, r16
-    rjmp REVISAR_BOTONES  ; <-- OBLIGATORIO SALTAR AQUI
+    rjmp REVISAR_BOTONES  ; 
 
 MOSTRAR_PESADA:
     ldi r16, 0b00000100   ; PC2 / Pin A2
     out PORTC, r16
-    rjmp REVISAR_BOTONES  ; <-- OBLIGATORIO SALTAR AQUI
+    rjmp REVISAR_BOTONES  ;
 
 REVISAR_BOTONES:
-    ; Leer Botón Carga (PD3 / Pin 3)
+    ; Leer BotÃ³n Carga (PD3 / Pin 3)
     sbis PIND, 3
     rjmp CAMBIAR_CARGA
 
-    ; Leer Botón Inicio (PD2 / Pin 2)
+    ; Leer BotÃ³n Inicio (PD2 / Pin 2)
     sbis PIND, 2
     rjmp VALIDAR_SENSORES
 
@@ -82,20 +82,20 @@ REVISAR_BOTONES:
 CAMBIAR_CARGA:
     rcall DELAY_CORTO   ; Esperar a que se estabilice el rebote inicial
     
-    inc r17               ; Incrementar selección
-    cpi r17, 3            ; ¿Llegó a 3?
+    inc r17               ; Incrementar selecciÃ³n
+    cpi r17, 3            ; Â¿LlegÃ³ a 3?
     brne ESPERAR_SOLTAR
     clr r17               ; Reiniciar a 0
 
 ESPERAR_SOLTAR:
     rcall DELAY_CORTO   ; Esperar en cada lectura
-    sbis PIND, 3          ; ¿Sigue presionado el botón?
-    rjmp ESPERAR_SOLTAR   ; Quedarse aca mientras el botón siga presionado
+    sbis PIND, 3          ; Â¿Sigue presionado el botÃ³n?
+    rjmp ESPERAR_SOLTAR   ; Quedarse aca mientras el botÃ³n siga presionado
 
     rcall DELAY_CORTO   ; Esperar a que el rebote final termine
     rjmp REPOSO
 
-; AQUÍ SE DEFINEN LAS SUBRUTINAS
+; AQUÃ SE DEFINEN LAS SUBRUTINAS
 
 ESPERAR_SEGUNDOS:
     rcall DELAY_1S
@@ -114,7 +114,7 @@ L1: dec r22
     dec r20
     brne L1
     ret
-
+;Definimos el delay antirrebote
 DELAY_CORTO:
     ldi r20, 150
     ldi r21, 250
