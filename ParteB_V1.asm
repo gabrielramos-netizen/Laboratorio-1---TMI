@@ -1,129 +1,107 @@
-.include "m328pdef.inc"
+.include "m328pbdef.inc"
 .org 0x00
 
-;CONFIGURACIÓN DE PUERTOS
-    ; Configuramos el Puerto B completo como Salida 
+    ; Salidas:
     ldi r16, 0b01111111
-    out DDRB, r16
-
-    ; Configurar PD2, PD3 y PD4 como entradas
-    ldi r16, 0b00000000
     out DDRD, r16
-    
-    ; Activar resistencias Pull-Up en PD2, PD3 y PD4
-    ldi r16, (1 << PD2) | (1 << PD3) | (1 << PD4)
-    out PORTD, r16
 
-    ; r17 guardará el valor del contador que inicia en 0
+    ; Entradas
+    ldi r16, 0b00000000
+    out DDRC, r16
+    
+    ;====Pull-Up====
+    ldi r16, (1 << 0) | (1 << 1) | (1 << 2)
+    out PORTC, r16
+
+    ;==Contador==
     ldi r17, 0
 
-;BUCLE PRINCIPAL
+
 bucle_principal:
     cpi r17, 0
-    brne verificar_1
-    rjmp num_0
-verificar_1:
+    breq num_0
     cpi r17, 1
-    brne verificar_2
-    rjmp num_1
-verificar_2:
+    breq num_1
     cpi r17, 2
-    brne verificar_3
-    rjmp num_2
-verificar_3:
+    breq num_2
     cpi r17, 3
-    brne verificar_4
-    rjmp num_3
-verificar_4:
+    breq num_3
     cpi r17, 4
-    brne verificar_5
-    rjmp num_4
-verificar_5:
+    breq num_4
     cpi r17, 5
-    brne verificar_6
-    rjmp num_5
-verificar_6:
+    breq num_5
     cpi r17, 6
-    brne verificar_7
-    rjmp num_6
-verificar_7:
+    breq num_6
     cpi r17, 7
-    brne verificar_8
-    rjmp num_7
-verificar_8:
+    breq num_7
     cpi r17, 8
-    brne verificar_9
-    rjmp num_8
-verificar_9:
+    breq num_8
     cpi r17, 9
-    brne salto_leer_botones
-    rjmp num_9
-
-salto_leer_botones:
+    breq num_9
     rjmp leer_botones
 
+;====Display====
 num_0:
-    ldi r16, ~0b00111111 ; podriamos haber usado "com" en lugar de "~" pero nos ahorra varias lineas de codigo
+    ldi r16, 0b00111111
     rjmp mostrar_numero
 
 num_1:
-    ldi r16, ~0b00000110
+    ldi r16, 0b00000110
     rjmp mostrar_numero
 
 num_2:
-    ldi r16, ~0b01011011
+    ldi r16, 0b01011011
     rjmp mostrar_numero
 
 num_3:
-    ldi r16, ~0b01001111
+    ldi r16, 0b01001111
     rjmp mostrar_numero
 
 num_4:
-    ldi r16, ~0b01100110
+    ldi r16, 0b01100110
     rjmp mostrar_numero
 
 num_5:
-    ldi r16, ~0b01101101
+    ldi r16, 0b01101101
     rjmp mostrar_numero
 
 num_6:
-    ldi r16, ~0b01111101
+    ldi r16, 0b01111101
     rjmp mostrar_numero
 
 num_7:
-    ldi r16, ~0b00000111
+    ldi r16, 0b00000111
     rjmp mostrar_numero
 
 num_8:
-    ldi r16, ~0b01111111
+    ldi r16, 0b01111111
     rjmp mostrar_numero
 
 num_9:
-    ldi r16, ~0b01101111
+    ldi r16, 0b01101111
     rjmp mostrar_numero
 
 mostrar_numero:
-    out PORTB, r16
-    rjmp leer_botones
+    out PORTD, r16
 
-; --- ESCANEO DE BOTONES ---
 leer_botones:
-    sbic PIND, PD2          ; Presionaron Incremento? (0 = SÍ)
+    sbic PINC, 0
     rjmp verificar_dec
     rjmp boton_incrementar
 
 verificar_dec:
-    sbic PIND, PD3          ; Presionaron Decremento? (0 = SÍ)
+    sbic PINC, 1
     rjmp verificar_reiniciar
     rjmp boton_decrementar
 
 verificar_reiniciar:
-    sbic PIND, PD4          ; Presionaron Reinicio? (0 = SÍ)
-    rjmp bucle_principal    ; Si nadie presiona, repite el ciclo
+    sbic PINC, 2
+    rjmp bucle_principal
     rjmp boton_reiniciar
 
-; --- BOTÓN INCREMENTAR ---
+;====INCREMENTO====
 boton_incrementar:
+    ; Antirrebote al presionar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -136,9 +114,10 @@ retardo_inc1:
     brne retardo_inc1
 
 esperar_soltar_inc:
-    sbis PIND, PD2          ; Espera hasta que se suelte el botón
+    sbis PINC, 0
     rjmp esperar_soltar_inc
 
+    ; Antirrebote al soltar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -150,15 +129,15 @@ retardo_inc2:
     dec r18
     brne retardo_inc2
 
-    cpi r17, 9              ; Límite superior
-    brne incremento_correcto
-    rjmp bucle_principal
-incremento_correcto:
+    cpi r17, 9
+    breq fin_inc
     inc r17
+fin_inc:
     rjmp bucle_principal
 
-; --- BOTÓN DECREMENTAR ---
+;====Decremento===
 boton_decrementar:
+    ; Antirrebote al presionar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -171,9 +150,10 @@ retardo_dec1:
     brne retardo_dec1
 
 esperar_soltar_dec:
-    sbis PIND, PD3          ; Espera hasta que se libere el botón
+    sbis PINC, 1
     rjmp esperar_soltar_dec
 
+    ; Antirrebote al soltar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -185,15 +165,15 @@ retardo_dec2:
     dec r18
     brne retardo_dec2
 
-    cpi r17, 0              ; Límite inferior
-    brne decremento_correcto
-    rjmp bucle_principal
-decremento_correcto:
+    cpi r17, 0
+    breq fin_dec
     dec r17
+fin_dec:
     rjmp bucle_principal
 
-; --- BOTÓN REINICIAR ---
+
 boton_reiniciar:
+    ; Antirrebote al presionar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -206,9 +186,10 @@ retardo_rein1:
     brne retardo_rein1
 
 esperar_soltar_rein:
-    sbis PIND, PD4          ; Espera hasta que se libere el botón
+    sbis PINC, 2
     rjmp esperar_soltar_rein
 
+    ; Antirrebote al soltar
     ldi r18, 2
     ldi r19, 150
     ldi r20, 0
@@ -220,5 +201,5 @@ retardo_rein2:
     dec r18
     brne retardo_rein2
 
-    ldi r17, 0              ; Restablece a 0
+    ldi r17, 0
     rjmp bucle_principal
