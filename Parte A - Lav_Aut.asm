@@ -1,227 +1,220 @@
+; LAVADORA AUTOMATICA - PARTE A
+; Hicimos cambios, ahora decidimos hacerlo usando la pila, asi podemos usar rcall y ret. Además, se reduce la cantidad de lineas de codigo
+; Anteriormente no funcionaba 
 .include "m328pdef.inc"
 
 .org 0x0000
-    rjmp CONFIGURACION
+    rjmp INICIO
 
-; INICIALIZACIÓN Y CONFIGURACIÓN DE PUERTOS
-CONFIGURACION:
-    ; Configurar PORTB como salidas (LEDs de Proceso y Motor)
-    ldi r16, 0xFF
+; CONFIGURACIÓN DE PUERTOS
+INICIO:
+    ; Configuramos el Stack Pointer inicializandolo  
+    ldi r16, LOW(RAMEND)
+    out SPL, r16
+    ldi r16, HIGH(RAMEND)
+    out SPH, r16
+
+    clr r16
+    out PORTB, r16
+    out PORTC, r16
+
+    ; Puerto B (Pines 8 al 12 en el arduino): Salidas LEDs de Proceso
+    ldi r16, 0b00011111
     out DDRB, r16
-    clr r16
-    out PORTB, r16     ; Apagar todos los LEDs de PORTB
 
-    ; Configurar PORTC como salidas (LEDs de Selección de Carga)
-    ldi r16, 0x07
+    ; Puerto C (Pines A0 al A2): Salidas LEDs de Carga 
+    ldi r16, 0b00000111
     out DDRC, r16
-    clr r16
-    out PORTC, r16     ; Apagar todos los LEDs de PORTC
 
-    ; Configurar PORTD como entradas
+    ; Puerto D (Pines 2 al 5): Entradas con Pull-Up activados
     clr r16
     out DDRD, r16
-    ; Activar Pull-ups en PD0, PD1, PD2 y PD3
-    ldi r16, 0x0F
+    ldi r16, 0b00111100   ; Activar Pull-ups en PD2, PD3, PD4, PD5
     out PORTD, r16
 
-    clr r17           ; Carga por defecto: Ligera (0)
+    clr r17               ; Inicializar Tipo de Carga en 0 (Ligera)
 
-; ESTADO 1: ESPERA Y SELECCIÓN DE CARGA (LISTO)
-ESTADO_ESPERA:
-    ; LED Listo para lavar (PB0) encendido
-    ldi r16, (1<<PB0)
+;definimos el bucle principal 
+REPOSO:
+    ; Encendemos el LED "Listo para lavar" (PB0 / Pin 8)
+    ldi r16, 0b00000001
     out PORTB, r16
 
-    ; Actualizar LEDs de Carga en PORTC
+    ; Evaluamos el registro de carga r17 y saltamos al bloque que corresponda
     cpi r17, 0
-    breq LED_CARGA_LIGERA
+    breq MOSTRAR_LIGERA
+
     cpi r17, 1
-    breq LED_CARGA_MEDIA
-    rjmp LED_CARGA_PESADA
+    breq MOSTRAR_MEDIA
 
-LED_CARGA_LIGERA:
-    ldi r16, (1<<PC0)
+    cpi r17, 2
+    breq MOSTRAR_PESADA
+
+    ; Control de seguridad: Si r17 no es 0, 1 o 2, reiniciar
+    clr r17
+    rjmp MOSTRAR_LIGERA
+
+MOSTRAR_LIGERA:
+    ldi r16, 0b00000001   ; PC0 / Pin A0
     out PORTC, r16
-    rjmp COMPROBAR_BOTONES
+    rjmp REVISAR_BOTONES  
 
-LED_CARGA_MEDIA:
-    ldi r16, (1<<PC1)
+MOSTRAR_MEDIA:
+    ldi r16, 0b00000010   ; PC1 / Pin A1
     out PORTC, r16
-    rjmp COMPROBAR_BOTONES
+    rjmp REVISAR_BOTONES  
 
-LED_CARGA_PESADA:
-    ldi r16, (1<<PC2)
+MOSTRAR_PESADA:
+    ldi r16, 0b00000100   ; PC2 / Pin A2
     out PORTC, r16
+    rjmp REVISAR_BOTONES  ;
 
-COMPROBAR_BOTONES:
-    ; Leer entradas del PORTD
-    in r16, PIND
-
-    ; Verificar pulsador de Selección de Carga (PD1 - Activo en Bajo)
-    sbrs r16, PD1
+REVISAR_BOTONES:
+    ; Leer Botón Carga (PD3 / Pin 3)
+    sbis PIND, 3
     rjmp CAMBIAR_CARGA
 
-    ; Verificar pulsador de Inicio (PD0 - Activo en Bajo)
-    sbrs r16, PD0
-    rjmp VERIFICAR_SENSORES
+    ; Leer Botón Inicio (PD2 / Pin 2)
+    sbis PIND, 2
+    rjmp VALIDAR_SENSORES
 
-    rjmp ESTADO_ESPERA
+    rjmp REPOSO
 
+; CAMBIO DE CARGA 
 CAMBIAR_CARGA:
-    ; Retardo antirrebote de 1 segundo
-    ldi r21, 1
-    rjmp DELAY_1SEC_LOOP
+    rcall DELAY_CORTO   
+    
+    inc r17               ; Incrementar selección
+    cpi r17, 3            ; ¿Llegó a 3?
+    brne ESPERAR_SOLTAR
+    clr r17               ; Reiniciar a 0
 
-ANTIRREBOTE_RET:
-    inc r17
-    cpi r17, 3
-    brne ESTADO_ESPERA
-    clr r17           ; Reiniciar a Carga Ligera
-    rjmp ESTADO_ESPERA
+ESPERAR_SOLTAR:
+    rcall DELAY_CORTO   ; Esperar en cada lectura
+    sbis PIND, 3          ; ¿Sigue presionado el botón?
+    rjmp ESPERAR_SOLTAR   ; Quedarse aca mientras el botón siga presionado
 
-VERIFICAR_SENSORES:
-    ; Verificar si Puerta Cerrada (PD2) y Agua Llena (PD3) están activados (en Alto)
-    in r16, PIND
-    andi r16, (1<<PD2) | (1<<PD3)
-    cpi r16, (1<<PD2) | (1<<PD3)
-    breq INICIAR_LAVADO
-    rjmp ESTADO_ESPERA  ; No inicia si falta alguna condición
+    rcall DELAY_CORTO   ; Esperar a que el rebote final termine
+    rjmp REPOSO
 
-; ESTADO 2: PROCEDIMIENTO DE LAVADO
-INICIAR_LAVADO:
-    ldi r16, (1<<PB1)  ; LED Proceso Lavado y Motor activo
+	; 
+; VALIDACIÓN DE SENSORES (PUERTA Y AGUA)
+VALIDAR_SENSORES:
+    rcall DELAY_PEQUENO
+    sbic PIND, 4          ; Puerta (PD4 / Pin 4) - Debe estar a GND
+    rjmp REPOSO
+    sbic PIND, 5          ; Agua (PD5 / Pin 5) - Debe estar a GND
+    rjmp REPOSO
+
+    rjmp PROCESO_LAVADO
+
+; ETAPA 1: LAVADO (5 ciclos)
+
+PROCESO_LAVADO:
+    ldi r18, 5
+BUCLE_LAVADO:
+    ; Motor Giro Derecha, LED Lavado (PB1 / Pin 9)
+    ldi r16, 0b00000010
     out PORTB, r16
-    ldi r22, 5         ; Repite el proceso 5 veces
+    ldi r19, 2
+    add r19, r17
+    rcall ESPERAR_SEGUNDOS
 
-CICLO_LAVADO:
-    ; Tiempo de Giro = 2s + ajuste por carga
-    mov r21, r17
-    subi r21, -2       ; r21 = r17 + 2
-    rjmp DELAY_1SEC_LOOP
-
-RET_GIRO_LAVADO:
-    ; Pausa = 1s + ajuste por carga 
-    mov r21, r17
-    subi r21, -1       ; r21 = r17 + 1
-    clr r16            ; Apagar motor durante la pausa
-    out PORTB, r16
-    rjmp DELAY_1SEC_LOOP
-
-RET_PAUSA_LAVADO:
-    ldi r16, (1<<PB1)  ; Enciende el motor nuevamente
-    out PORTB, r16
-
-    dec r22
-    brne CICLO_LAVADO
-    rjmp INICIAR_CENTRIFUGADO
-
-; ESTADO 3: PROCEDIMIENTO DE CENTRIFUGADO
-INICIAR_CENTRIFUGADO:
-    ldi r16, (1<<PB2)  ; LED Proceso Centrifugado
-    out PORTB, r16
-
-    ; Tiempo Base = 15s + (r17 * 3s)
-    ldi r21, 15
-    cpi r17, 0
-    breq EXEC_CENTRIFUGADO
-    cpi r17, 1
-    breq CENT_MEDIO
-    subi r21, -6       ; Carga Pesada: +6s
-    rjmp EXEC_CENTRIFUGADO
-
-CENT_MEDIO:
-    subi r21, -3       ; Carga Media: +3s
-
-EXEC_CENTRIFUGADO:
-    rjmp DELAY_1SEC_LOOP
-
-RET_CENTRIFUGADO:
-    rjmp INICIAR_SECADO
-
-; ESTADO 4: PROCEDIMIENTO DE SECADO
-INICIAR_SECADO:
-    ; Giro Derecha (PB3) 
-    ldi r16, (1<<PB3)
-    out PORTB, r16
-    ldi r21, 5
-    mov r16, r17
-    lsl r16            ; Multiplicar carga por 2
-    add r21, r16
-    rjmp DELAY_1SEC_LOOP
-
-RET_SEC_DER:
-    ; Pausa  
+    ; Pausa, Apagado
     clr r16
     out PORTB, r16
-    ldi r21, 3
-    mov r16, r17
-    lsl r16
-    add r21, r16
-    rjmp DELAY_1SEC_LOOP
+    ldi r19, 1
+    add r19, r17
+    rcall ESPERAR_SEGUNDOS
 
-RET_SEC_PAUSA:
-    ; Giro Izquierda (PB4) 
-    ldi r16, (1<<PB4)
+    dec r18
+    brne BUCLE_LAVADO
+
+; ETAPA 2: CENTRIFUGADO
+
+PROCESO_CENTRIFUGADO:
+    ; LED Centrifugado (PB2 / Pin 10)
+    ldi r16, 0b00000100
     out PORTB, r16
-    ldi r21, 5
-    mov r16, r17
-    lsl r16
-    add r21, r16
-    rjmp DELAY_1SEC_LOOP
 
-RET_SEC_IZQ:
-    rjmp FIN_PROCESO
+    ldi r19, 15
+    cpi r17, 1
+    breq CENTRIFUGADO_MEDIA
+    cpi r17, 2
+    breq CENTRIFUGADO_PESADA
+    rjmp EJECUTAR_CENTRIFUGADO
 
-; ESTADO 5: FIN DEL PROCESO
-FIN_PROCESO:
-    ldi r16, (1<<PB5)  ; LED Fin de proceso
+CENTRIFUGADO_MEDIA:
+    ldi r19, 18
+    rjmp EJECUTAR_CENTRIFUGADO
+
+CENTRIFUGADO_PESADA:
+    ldi r19, 21
+
+EJECUTAR_CENTRIFUGADO:
+    rcall ESPERAR_SEGUNDOS
+
+; ETAPA 3: SECADO
+PROCESO_SECADO:
+    ; 1. Giro Derecha: LED Secado + LED Lavado (PB3 + PB1)
+    ldi r16, 0b00001010
+    out PORTB, r16
+    ldi r19, 5
+    add r19, r17
+    add r19, r17
+    rcall ESPERAR_SEGUNDOS
+
+    ; 2. Pausa: Solo LED Secado (PB3 / Pin 11)
+    ldi r16, 0b00001000
+    out PORTB, r16
+    ldi r19, 3
+    add r19, r17
+    add r19, r17
+    rcall ESPERAR_SEGUNDOS
+
+    ; 3. Giro Izquierda: LED Secado + LED Fin/Izq (PB3 + PB4)
+    ldi r16, 0b00011000
+    out PORTB, r16
+    ldi r19, 5
+    add r19, r17
+    add r19, r17
+    rcall ESPERAR_SEGUNDOS
+
+;
+; FIN DE PROCESO
+PROCESO_FIN:
+    ; Solo LED Fin del Proceso (PB4 / Pin 12)
+    ldi r16, 0b00010000
     out PORTB, r16
     
-    ; Esperar 5 segundos y regresar al estado de reposo
-    ldi r21, 5
-    rjmp DELAY_1SEC_LOOP
+    ldi r19, 4
+    rcall ESPERAR_SEGUNDOS
+    rjmp REPOSO
+; AQUÍ SE DEFINEN LAS SUBRUTINAS
 
-RET_FIN:
-    rjmp ESTADO_ESPERA
-
-; BUCLE DE RETARDO ÚNICO Y RUTINA DE RETORNO 
-
-DELAY_1SEC_LOOP:
-    ldi r18, 100
-D_L1:
-    ldi r19, 200
-D_L2:
-    ldi r20, 250
-D_L3:
-    dec r20
-    brne D_L3
+ESPERAR_SEGUNDOS:
+    rcall DELAY_1S
     dec r19
-    brne D_L2
-    dec r18
-    brne D_L1
+    brne ESPERAR_SEGUNDOS
+    ret
+
+DELAY_1S:
+    ldi r20, 82
+    ldi r21, 43
+    ldi r22, 0
+L1: dec r22
+    brne L1
     dec r21
-    brne DELAY_1SEC_LOOP
+    brne L1
+    dec r20
+    brne L1
+    ret
 
-; Conmutador de Retorno basado en el Estado de Salida Actual 
-DEVOLVER_RETARDO:
-    in r16, PORTB
-    cpi r16, (1<<PB0)
-    breq ANTIRREBOTE_RET
-    cpi r16, (1<<PB1)
-    breq RET_GIRO_LAVADO
-    cpi r16, 0x00
-    breq EVALUAR_PAUSA
-    cpi r16, (1<<PB2)
-    breq RET_CENTRIFUGADO
-    cpi r16, (1<<PB3)
-    breq RET_SEC_DER
-    cpi r16, (1<<PB4)
-    breq RET_SEC_IZQ
-    cpi r16, (1<<PB5)
-    breq RET_FIN
-    rjmp ESTADO_ESPERA
-
-EVALUAR_PAUSA:
-    cpi r22, 0
-    brne RET_PAUSA_LAVADO
-    rjmp RET_SEC_PAUSA
+DELAY_CORTO:
+    ldi r20, 150
+    ldi r21, 250
+L2: dec r21
+    brne L2
+    dec r20
+    brne L2
+    ret
