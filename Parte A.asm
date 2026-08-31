@@ -103,6 +103,70 @@ RET_PAUSA_LAVADO:
     brne CICLO_LAVADO_INCORRECTO
     rjmp INICIAR_CENTRIFUGADO
 
+	; ESTADO 3: PROCEDIMIENTO DE CENTRIFUGADO
+INICIAR_CENTRIFUGADO:
+    ldi r16, (1<<PB2)  
+    out PORTB, r16
+
+    ldi r21, 15
+    cpi r17, 0
+    breq EXEC_CENTRIFUGADO
+    cpi r17, 1
+    breq CENT_MEDIO
+    subi r21, -6       
+    rjmp EXEC_CENTRIFUGADO
+
+CENT_MEDIO:
+    subi r21, -3       
+
+EXEC_CENTRIFUGADO:
+    rjmp DELAY_1SEC_LOOP
+
+RET_CENTRIFUGADO:
+    rjmp INICIAR_SECADO
+
+; ESTADO 4: PROCEDIMIENTO DE SECADO
+INICIAR_SECADO:
+    ldi r16, (1<<PB3)
+    out PORTB, r16
+    ldi r21, 5
+    mov r16, r17
+    lsl r16            
+    add r21, r16
+    rjmp DELAY_1SEC_LOOP
+
+RET_SEC_DER:
+    clr r16
+    out PORTB, r16
+    ldi r21, 3
+    mov r16, r17
+    lsl r16
+    add r21, r16
+    rjmp DELAY_1SEC_LOOP
+
+RET_SEC_PAUSA:
+    ldi r16, (1<<PB4)  
+    out PORTB, r16
+    ldi r21, 5
+    mov r16, r17
+    lsl r16
+    add r21, r16
+    rjmp DELAY_1SEC_LOOP
+
+RET_SEC_IZQ:
+    rjmp FIN_PROCESO
+
+; ESTADO 5: FIN DEL PROCESO
+FIN_PROCESO:
+    ldi r16, (1<<PB5)  
+    out PORTB, r16
+    
+    ldi r21, 5
+    rjmp DELAY_1SEC_LOOP
+
+RET_FIN:
+    rjmp ESTADO_ESPERA
+
 ; BUCLE DE RETARDO ÚNICO Y RUTINA DE RETORNO 
 
 DELAY_1SEC_LOOP:
