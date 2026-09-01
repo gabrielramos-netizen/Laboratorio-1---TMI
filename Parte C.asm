@@ -17,14 +17,14 @@
 rjmp INICIO
 
 INICIO:
-;======= Punteto de pila =======;
+;======= Puntero de pila =======;
 	ldi r16, low(RAMEND)
 	out SPL, r16
 	ldi r16, high(RAMEND)
 	out SPH, r16
 
 ;======= configuracion de leds (salidas)======
-	ldi r16, (1<<PB0 | 1<<PB1 | 1<<PB2 | 1<<PB3 | 1<<PB4 | 1<<PB5 | 1<<PB6 | 1<<PB7)
+	ldi r16, 0xFF
 	out DDRD, r16
 	clr r16
 	out PORTD, r16
