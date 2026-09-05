@@ -4,44 +4,66 @@
     rjmp reset
 
 reset:
+    ; === config pila ===
     ldi r16, low(ramend)
     out spl, r16
     ldi r16, high(ramend)
     out sph, r16
 
+    ; === salidas ===
     ldi r16, 0xff
-    out ddrd, r16
-    out ddrb, r16
+    out ddrd, r16 ; pines D
+    out ddrb, r16 ; pines B
     
+    ; === entradas y pull-ups ===
     ldi r16, 0x00
-    out ddrc, r16
-    ldi r16, 0x03
-    out portc, r16
+    out ddrc, r16 ; pines C entrada
     
-    clr r20
+    ldi r16, 0x03
+    out portc, r16 ; pull up en PC0 y PC1
+    
+    clr r20 ; contador
 
+; === loop principal ===
 main:
     rcall leer_botones
     rcall cargar_puntero_z
     rcall mostrar_imagen
     rjmp main
 
+; === rutinas de botones ===
 leer_botones:
-    sbic pinc, 0
+    sbic pinc, 0 ; chequeo btn 1
     rjmp probar_boton2
+    
     inc r20
     cpi r20, 5
-    brne fin_b1
+    brne esperar1
     clr r20
-fin_b1:
+
+esperar1:
+    ; antirrebote btn 1
+    rcall retardo_50ms
+    sbis pinc, 0
+    rjmp esperar1
     ret
 
 probar_boton2:
-    sbic pinc, 1
+    sbic pinc, 1 ; chequeo btn 2
     ret
-    inc r20
+    
+    ; xor para alternar la pareja
+    ldi r16, 0x01
+    eor r20, r16
+
+esperar2:
+    ; antirrebote btn 2
+    rcall retardo_50ms
+    sbis pinc, 1
+    rjmp esperar2
     ret
 
+; === cargar de imagen ===
 cargar_puntero_z:
     cpi r20, 0
     breq cargar_sonrisa
@@ -53,7 +75,7 @@ cargar_puntero_z:
     breq cargar_asterisco
     
 cargar_xd:
-    ldi zl, low(figura_xd << 1)
+    ldi zl, low(figura_xd << 1) 
     ldi zh, high(figura_xd << 1)
     ret
 
@@ -77,30 +99,42 @@ cargar_asterisco:
     ldi zh, high(asterisco << 1)
     ret
 
+; === barrido de la matriz ===
 mostrar_imagen:
     ldi r17, 0b00000001
     ldi r18, 8
 
 bucle_filas:
-    out portd, r17
+    out portd, r17 
     lpm r16, z+
-    out portb, r16
+    out portb, r16  
     rcall retardo_2ms
     
     ldi r16, 0x00
-    out portb, r16
+    out portb, r16  
     
     lsl r17
     dec r18
     brne bucle_filas
     ret
 
+; === retardos ===
 retardo_2ms:
     ldi r19, 200
 l1: dec r19
     brne l1
     ret
 
+retardo_50ms:
+    ldi r21, 100
+k1: ldi r22, 200
+k2: dec r22
+    brne k2
+    dec r21
+    brne k1
+    ret
+
+; === tablas de datos ===
 carita_sonrisa:
     .db 0b00000000, 0b01100110
     .db 0b01100110, 0b00000000
